@@ -1,4 +1,4 @@
-import { FlatList, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Dimensions, FlatList, Modal, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
@@ -14,17 +14,17 @@ import { useMemo, useState } from 'react';
 export default function TabOneScreen() {
 
 	const [category, setCategory] = useState<string>('all')
+	const [modalVisible, setModalVisible] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<any>(null);
 	//const [displayData, setDisplayData] = useState<any[]>(mockNewsData)
 
 
 	const displayData = useMemo(() => {
-
 		if (category === 'all') {
 			return mockNewsData
 		} else {
 			return mockNewsData.filter((entry:any) => entry.type === category)
 		}
-
 	}, [category])
 
 
@@ -34,11 +34,20 @@ export default function TabOneScreen() {
 	};
 
 	const renderItem = ({ item }: any) => (
-        <View style={styles.itemContainer}>
+        <Pressable 
+			style={({ pressed }) => [
+				styles.itemContainer,
+				pressed && styles.pressedItemContainer
+			]}
+            onPress={() => {
+                setSelectedItem(item);
+                setModalVisible(true);
+            }}
+        >
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.description}>{item.description}</Text>
             <Text style={styles.date}>{new Date(item.publicationDate).toLocaleDateString()}</Text>
-        </View>
+        </Pressable>
     );
 
 	return (
@@ -104,9 +113,48 @@ export default function TabOneScreen() {
 				/>
 
 			</View>
+			<Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.centeredView}>
+					<View style={styles.modalView}>
+						<ScrollView style={styles.scrollView}>
+						{selectedItem && (
+                            <>
+                                <Text style={styles.articleTitle}>{selectedItem.title}</Text>
+                                <Text style={styles.articleByline}>
+                                    Published on {new Date(selectedItem.publicationDate).toLocaleDateString()}
+                                    {selectedItem.authors && ` | By ${selectedItem.authors.join(', ')}`}
+                                </Text>
+                                <Text style={styles.articleContent}>{selectedItem.description}</Text>
+								<Text style={styles.articleContent}>
+									Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum. Donec in efficitur orci, at aliquet metus. Fusce a ex pretium, ultrices ante quis, blandit leo. 
+									{/* ... More article content ... */}
+								</Text>
+                            </>
+                        )}
+							<Pressable
+								style={styles.buttonClose}
+								onPress={() => setModalVisible(!modalVisible)}
+							>
+								<Text style={styles.textStyle}>
+									Back To News Feed
+								</Text>
+							</Pressable>
+						</ScrollView>
+					</View>
+				</View>
+            </Modal>
 		</View>
 	);
 }
+
+const screenHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
   	container: {
@@ -145,6 +193,12 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
     },
+	pressedItemContainer: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+		backgroundColor: "#f1f1f1"
+    },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -157,6 +211,59 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#888',
     },
+	centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22,
+    },
+    modalView: {
+		height: screenHeight * 0.7,
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    buttonClose: {
+        backgroundColor: "#2196F3",
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+		marginTop: 30
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    scrollView: {
+        marginHorizontal: 20,
+    },
+    articleTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    articleByline: {
+        fontSize: 16,
+        color: 'gray',
+        marginBottom: 12,
+    },
+    articleContent: {
+        fontSize: 18,
+        color: 'black',
+		paddingTop: 20
+    },
+
 });
 
 
