@@ -1,26 +1,49 @@
-import { ScrollView, StyleSheet } from 'react-native';
+import { Dimensions, FlatList, ScrollView, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 
+
+
+const screenHeight = Dimensions.get('window').height;
+
 export default function TabTwoScreen() {
+
+
+	const stockRow = ({ item }: any) => (
+		<View style={styles.stockRow}>
+		  <Text style={styles.title}>{item.title} ({item.symbol})</Text>
+		  <Text style={styles.price}>${item.price}</Text>
+		  <Text style={item.percentChange >= 0 ? styles.positive : styles.negative}>
+			{item.percentChange}%
+		  </Text>
+		</View>
+	);
+	
 	return (
-		<View style={styles.container}>
-		<ScrollView 
-			horizontal={true} 
-			style={styles.scrollViewContainer}
-			showsHorizontalScrollIndicator={true}
-		>
-			{stockIndexes.map((stock, index) => (
-				<StockCard key={index} {...stock} />
-			))}
+		<ScrollView style={styles.container}>
+			<ScrollView 
+				horizontal={true} 
+				style={styles.scrollViewContainer}
+				showsHorizontalScrollIndicator={true}
+			>
+				{stockIndexes.map((stock, index) => (
+					<StockCard key={index} {...stock} />
+				))}
+			</ScrollView>
+			<View>
+				<Text style={styles.stockSectionTitle}>
+					S&P 500 Market Leaders
+				</Text>
+				<View style={styles.stockListContainer}>
+					<FlatList
+						data={mockStockData}
+						renderItem={stockRow}
+						keyExtractor={item => item.symbol}
+						/>
+				</View>
+			</View>
 		</ScrollView>
-		<View>
-			<Text>
-				Body
-			</Text>
-		</View>
-		</View>
 	);
 }
 
@@ -57,6 +80,14 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
+	stockListContainer: {
+		//maxHeight: screenHeight /2
+	},
+	stockSectionTitle: {
+		fontSize: 20,
+		marginLeft: 20,
+		marginTop: 20,
+	},
 	avatar: {
 		borderRadius: 30/2,
 		width: 30,
@@ -87,7 +118,7 @@ const styles = StyleSheet.create({
 	},
 	title: {
 		fontSize: 20,
-		color: "#6161616",
+		color: "#616161",
 		fontWeight: "500",
 	},
 	symbolContainer: {
@@ -114,6 +145,14 @@ const styles = StyleSheet.create({
 	negative: {
 		color: 'red',
 	},
+	stockRow: {
+		//backgroundColor: '#f9c2ff',
+		paddingHorizontal: 20,
+		marginVertical: 8,
+		marginHorizontal: 16,
+		borderBottomWidth: 1,
+		borderBlockColor: '#dfdfdf'
+	},
 
 });
 
@@ -126,3 +165,16 @@ const stockIndexes = [
   { title: "Russell 2000", symbol: "RUT", price: "2234.1", percentChange: "0.25%", grossChange: "5.58" },
   { title: "Euro Stoxx 50", symbol: "ESTX", price: "3970.5", percentChange: "-0.30%", grossChange: "-11.91" }
 ];
+
+const mockStockData = [
+	{ title: "Apple Inc.", symbol: "AAPL", price: 150.34, percentChange: 0.8 },
+	{ title: "Microsoft Corporation", symbol: "MSFT", price: 280.56, percentChange: -0.4 },
+	{ title: "Amazon.com Inc.", symbol: "AMZN", price: 3300.51, percentChange: 1.2 },
+	{ title: "Alphabet Inc. (Class A)", symbol: "GOOGL", price: 2752.42, percentChange: -0.6 },
+	{ title: "Facebook Inc.", symbol: "FB", price: 355.67, percentChange: 0.5 },
+	{ title: "Tesla Inc.", symbol: "TSLA", price: 710.44, percentChange: -1.1 },
+	{ title: "Berkshire Hathaway Inc.", symbol: "BRK.A", price: 418500.00, percentChange: 0.3 },
+	{ title: "Visa Inc.", symbol: "V", price: 235.60, percentChange: 0.7 },
+	{ title: "Johnson & Johnson", symbol: "JNJ", price: 170.25, percentChange: 0.2 },
+	{ title: "Walmart Inc.", symbol: "WMT", price: 140.54, percentChange: -0.5 }
+  ];
